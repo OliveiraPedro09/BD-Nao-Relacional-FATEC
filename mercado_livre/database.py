@@ -7,7 +7,7 @@ import certifi
 uri = "mongodb+srv://MercadoLivre:1234@cluster0.z5cpx.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
 
 # Criar um cliente e conectar ao servidor
-client = MongoClient(uri, server_api=ServerApi('1'), tlsCAFile=certifi.where())
+client = MongoClient(uri, tls=True, server_api=ServerApi('1'), tlsCAFile=certifi.where())
 
 # Verificar a conexão
 try:
@@ -24,3 +24,4 @@ usuarios_collection = database['Usuario']
 vendedores_collection = database['Vendedores']
 produtos_collection = database['Produtos']
 favoritos_collection = database['Favoritos']
+compras_collection = database['Compras']

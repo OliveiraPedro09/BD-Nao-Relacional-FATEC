@@ -11,6 +11,7 @@ from usuarios.listUser import listar_usuarios
 from usuarios.editUser import atualizar_usuario
 from usuarios.deleteUser import deletar_usuario
 from favoritos.addFavoritos import favoritar_produto
+from compras.compras import comprar_produto
 
 def menu():
     while True:
@@ -40,7 +41,8 @@ def menu_usuarios():
         print("3. Atualizar Usuário")
         print("4. Excluir Usuário")
         print("5. Favoritar Produto")
-        print("6. Voltar")
+        print("6. Comprar Produto")
+        print("7. Voltar")
         opcao = input("Escolha uma opção: ")
 
         if opcao == '1':
@@ -54,6 +56,8 @@ def menu_usuarios():
         elif opcao == '5':
             favoritar_produto()
         elif opcao == '6':
+            comprar_produto()
+        elif opcao == '7':
             break
         else:
             print("Opção inválida! Tente novamente.")
