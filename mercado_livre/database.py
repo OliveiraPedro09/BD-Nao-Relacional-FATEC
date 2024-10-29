@@ -4,7 +4,7 @@ from bson.objectid import ObjectId
 import certifi
 
 # Configuração da conexão com MongoDB Atlas
-uri = "mongodb+srv://MercadoLivre:1234@cluster0.z5cpx.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+uri = "mongodb+srv://<Nome do Bando>:<senha>@cluster0.z5cpx.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
 
 # Criar um cliente e conectar ao servidor
 client = MongoClient(uri, tls=True, server_api=ServerApi('1'), tlsCAFile=certifi.where())
