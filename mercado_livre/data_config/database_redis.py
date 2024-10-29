@@ -13,6 +13,3 @@ def createRedisDatabase():
     except redis.ConnectionError:
         print('Erro de conexão com o Redis!')
         return None
-    except Exception as e:
-        print(f'Erro inesperado: {e}')
-        return None
