@@ -1,25 +1,24 @@
-from database import compras_collection, produtos_collection
+from mercado_livre.data_config.database_mongo import compras_collection, produtos_collection
 import uuid
 from bson import ObjectId
 
-def comprar_produto():
+def buy_product():
     id_usuario = input("Digite o ID do usuário: ")
     id_produto = input("Digite o ID do produto: ")
     if id_usuario == '' or id_produto == '':
         print("ID do usuário e ID do produto são obrigatórios!")
-        return comprar_produto()
+        return
     
     try:
         produto_id = ObjectId(id_produto)
     except Exception as e:
         print("ID do produto inválido!")
-        return comprar_produto()
+        return
 
-    
     produto = produtos_collection.find_one({'_id': produto_id})
     if not produto:
         print("Produto não encontrado!")
-        return comprar_produto()
+        return
     
     id_compra = str(uuid.uuid4())
     nova_compra = {
