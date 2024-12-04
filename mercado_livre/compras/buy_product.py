@@ -1,30 +1,50 @@
-from mercado_livre.data_config.database_mongo import compras_collection, produtos_collection
-import uuid
+import json
 from bson import ObjectId
+from utils.utils import list_products, find_product
+from auth import user_logged
+import uuid
 
-def buy_product():
-    id_usuario = input("Digite o ID do usuário: ")
-    id_produto = input("Digite o ID do produto: ")
-    if id_usuario == '' or id_produto == '':
-        print("ID do usuário e ID do produto são obrigatórios!")
-        return
-    
-    try:
-        produto_id = ObjectId(id_produto)
-    except Exception as e:
-        print("ID do produto inválido!")
+def buy_product(produtos_collection, db_redis, user, compras_collection):
+    if not user or '_id' not in user:
+        print("Erro: Usuário não autenticado corretamente.")
         return
 
-    produto = produtos_collection.find_one({'_id': produto_id})
-    if not produto:
-        print("Produto não encontrado!")
+    user_email = user['email']
+    if not user_logged(db_redis, user_email):
+        print("Erro: Usuário não está logado.")
         return
     
+    list_products(produtos_collection)
+
+    compras = []
+    while True:
+        product_id = input("Digite o ID do produto que deseja comprar: ")
+        product = find_product(product_id, produtos_collection)
+        if not product:
+            print("Produto não encontrado!")
+            continue
+
+        compras.append({"product": product})
+
+        continue_process = input("Deseja selecionar mais algum produto? (S/N) ").lower()
+        if continue_process == "n":
+            break
+
+    # Formata a lista de compras
+    lista_compras = [{"id_produto": str(item["product"]["_id"]),
+                      "nome": item["product"]["nome"],
+                      "preco": item["product"]["preco"]} for item in compras]
+
     id_compra = str(uuid.uuid4())
     nova_compra = {
         'id_compra': id_compra,
-        'id_usuario': id_usuario,
-        'produto': produto 
+        'id_usuario': str(user['_id']),
+        'produtos': lista_compras  # Este campo é uma lista e precisa ser serializado
     }
-    compra_id = compras_collection.insert_one(nova_compra).inserted_id
-    print(f"Compra criada com sucesso! ID da compra: {compra_id}")
+
+    compra_key = f"compra:{id_compra}"
+    db_redis.hset(compra_key, mapping={
+        key: json.dumps(value) if isinstance(value, (list, dict)) else value
+        for key, value in nova_compra.items()
+    })
+    print("Compra adicionada ao Redis com sucesso!")

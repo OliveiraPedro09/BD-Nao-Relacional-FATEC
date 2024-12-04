@@ -1,7 +1,17 @@
-def list_favorite(redis_client):
-    favorite_keys = redis_client.keys('usuario:*:favoritos')
+from bson import ObjectId
 
-    for key in favorite_keys:
-        favorite = redis_client.hgetall(key)
-        favorite_id = key.decode('utf-8').split(':')[1]
-        print(f"ID: {favorite_id}, Favoritos: {favorite}")
+def list_favorites(db_redis, user):
+    redis_key = f"user:{user['_id']}:favorites"
+    favorites = db_redis.smembers(redis_key)
+
+    favorite_list = [eval(fav.decode('utf-8'), {"ObjectId": ObjectId}) for fav in favorites]
+
+    if favorite_list:
+        print("-" * 40)
+        print("Favoritos armazenados:")
+        print("-" * 40)
+        for fav in favorite_list:
+            print(f"Produto ID: {fav['_id']}, \nNome: {fav['nome']}")
+            print("-" * 40)
+    else:
+        print("Nenhum favorito encontrado.")

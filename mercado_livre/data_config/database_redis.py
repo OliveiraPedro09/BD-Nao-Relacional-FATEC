@@ -2,14 +2,13 @@ import redis
 
 def createRedisDatabase():
     try:
-        connect = redis.Redis(
-            host='redis-18915.c308.sa-east-1-1.ec2.redns.redis-cloud.com',
-            port=18915,
-            password='MV64eb0W0SUwjPccj09JFkcyDyIL86Xg'
-        )
-        connect.ping()
+        r = redis.Redis(
+        host='redis-18858.c44.us-east-1-2.ec2.redns.redis-cloud.com',
+        port=18858,
+        password='sGNE00pnLPiLRIEWJ8vYjsrUXLaNtVdv')
+        r.ping()
         print('Conectado com sucesso ao Redis!')
-        return connect
+        return r
     except redis.ConnectionError:
         print('Erro de conexão com o Redis!')
         return None

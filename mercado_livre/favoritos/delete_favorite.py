@@ -1,41 +1,39 @@
 from bson import ObjectId
-from database_redis import createRedisDatabase
+from data_config.database_redis import createRedisDatabase
+from utils.utils import list_products, find_product
+from favoritos.list_favorites import list_favorites
 
-redis_client = createRedisDatabase()
 
-def delete_favorite():
-    user_id = input("Digite o ID do usuário: ")
-    product_id = input("Digite o ID do produto a ser desfavoritado: ")
 
-    if user_id == '' or product_id == '':
-        print("ID do usuário e do produto são obrigatórios!")
-        return
-    
-    try:
-        product_id = ObjectId(product_id)
-    except Exception as e:
-        print("ID do produto inválido!")
-        return
-    
-    if not redis_client:
-        print("Erro ao conectar ao Redis!")
-        return
-    
-    user_key = f"usuario:{user_id}"
-    user_data = redis_client.hgetall(user_key)
-    
-    if not user_data:
-        print("Usuário não encontrado!")
-        return
+def delete_favorite(produtos_collection, db_redis, user):
+    list_favorites(db_redis, user)
+    favorites_removed = []
 
-    favorite = user_data.get(b'favoritos', b'[]').decode('utf-8')
-    favorite_list = eval(favorite)
+    while True:
+        product_id = input('Digite o Id do produto que deseja remover do favorito: ')
+        product = find_product(product_id, produtos_collection)
 
-    if str(product_id) in favorite_list:
-        favorite_list.remove(str(product_id))
-    else:
-        print("Produto não encontrado nos favoritos do usuário!")
-        return
+        if product:
+            product_info = {
+                "_id":product["_id"],
+                "nome": product["nome"],
+            }
+            favorites_removed.append(product_info) 
+        else:
+            print('Produto não encontrado!')
 
-    redis_client.hset(user_key, "favoritos", str(favorite_list))
-    print(f"Produto {product_id} desfavoritado pelo usuário {user_id}.")
+        proceed = input('Deseja remover mais algum? (S/N) ').lower()
+        if proceed == 'n':
+            break
+
+    redis_key = f"user:{user['_id']}:favorites"
+
+    for fav in favorites_removed:
+        result = db_redis.srem(redis_key, str(fav))
+        
+        if result > 0:
+            print(f"Produto removido dos favoritos com sucesso.")
+        else:
+            print(f"Produto {fav} não encontrado nos favoritos.")
+
+    print("-=" * 20)
